@@ -13,22 +13,26 @@ set libraryScripts to (path to library folder as string) & "Scripts:"
 set libraryScripts to libraryScripts as alias
 
 -- find /Library/Scripts/Folder Action Scripts/ (where we'll put our custom action)
-set libraryFolderActionScripts to (systemScripts as string) & "Folder Action Scripts"
+set libraryFolderActionScripts to (libraryScripts as string) & "Folder Action Scripts"
 set libraryFolderActionScripts to libraryFolderActionScripts as alias
 
 -- debug
-choose folder with prompt "just checking" default location libraryFolderActionScripts
+--choose folder with prompt "just checking" default location libraryFolderActionScripts
 
 
 --	*****************************************************
 -- 	copy script files
 tell application "Finder"
-	-- find the folderActionScripts source folder
-	set sourceFolder to folder of thisFolder
-	set sourceFolder to (path to sourceFolder as string) & "folderActionScripts:"
-	set sourceFolder to sourceFolder as alias
+	-- find the "../folderActionScripts"older
+	set sourceFolder to (folder "folderActionScripts" of container of thisFolder)
 	
-	duplicate contents of folder sourceFolder to folder systemFolderActionScripts
+	repeat with eachItem in sourceFolder
+		if name of eachItem contains ".scpt" then
+			set eachItem to eachItem as alias
+			duplicate file eachItem to folder libraryFolderActionScripts with replacing
+		end if
+	end repeat
+	
 end tell
 
 --	*****************************************************
@@ -39,6 +43,7 @@ tell application "System Events" to set folder actions enabled to true
 --	which user's dropbox should we monitor?
 set button_returned to null
 repeat while button_returned is null or button returned of button_returned is not "Accept"
+	activate
 	set working_folder to choose folder with prompt "Please select the USER folder whose public dropbox should " & return & " be monitored for incoming audio uploads" default location path to users folder as alias
 	
 	set working_folder to working_folder as string
@@ -50,13 +55,12 @@ repeat while button_returned is null or button returned of button_returned is no
 		display dialog "The USER folder you selected does not contain a public drop box" buttons {"Oops, I'll select another folder"}
 	end if
 	
-	-- working_folder should be an alias
-	set working_folder to working_folder as alias
 end repeat
+
 
 --	*****************************************************
 --	find script to apply
-set scriptToApply to (path to libraryFolderActionScripts as string) & "uwe - dropbox new item alert.scpt"
+set scriptToApply to (libraryFolderActionScripts as string) & "uwe - dropbox new item alert.scpt"
 set scriptToApply to scriptToApply as alias
 
 -- debug
@@ -79,8 +83,8 @@ end tell
 
 --	*****************************************************
 --	apply folder action
-set EachItem to scriptToApply
-set ItemInfo to info for EachItem
+set eachItem to scriptToApply
+set ItemInfo to info for eachItem
 if not folder of ItemInfo then
 	set FileTypeOfItem to file type of ItemInfo
 	set FileExtensionOfItem to name extension of ItemInfo
