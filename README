@@ -1,0 +1,32 @@
+audioSegmentation
+
+What is it?
+This is a component part of the UWE transcription project.
+It consists of applescripts, shell scripts, PHP code, and sourcecode for commandline tools for audio conversion, segmentation, and timecoding.
+The current version is for OSX 10.6.3, has no automatic installation procedure. Instructions for manual installation are NOT included.
+
+The purpose of the audioSegmentation component is to:
+
+	* monitor an Apple Filesharing dropbox
+	* automatically prepare newly "dropped" files for segmentation
+	* convert and segment audio
+	* provide a web interface to:
+		* control the segmentation process
+		* preview timecoded skeleton-segmentation TRS XML 
+
+Requirements
+This component has only been tested on OSX 10.6.3.
+
+The application depends on /usr/bin/bash for shell scripting,
+also LAME 3.98.4,
+also modified versions (included) of mp3splt 2.2.1, libmp3splt 0.5.2, libmad 0.15.1b, and shntool 3.0.10,
+also textutil,
+Applescript,
+SystemEvents,
+...more? you betcha!
+
+The current version makes no attempt at robustness. It will fail miserably if dependencies are not installed exactly as on the development system.
+
+How do I use it?
+The current version does NOT have an automatic installation procedure.
+No instructions are provided for manual installation or configuration.
