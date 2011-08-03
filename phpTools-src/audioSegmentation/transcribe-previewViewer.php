@@ -46,6 +46,7 @@ Thanks,
 		. "<pre>"
 		. file_get_contents($pathname. "/this.submissioninfo",FILE_TEXT,NULL,0,120)
 		. "</pre>"
+		. "Click numbers in timecode column to seek audio file"
 		. "</div>\n";
 	            	
 	// original full mp3 link

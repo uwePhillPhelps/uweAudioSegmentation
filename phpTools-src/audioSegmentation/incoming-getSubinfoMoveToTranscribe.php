@@ -17,17 +17,8 @@ Thanks,
     <li>Information about the recording is entered (e.g. preferred voice profile, short description, etc)</li>
     <li>The server then timecodes and segments the recording (e.g. based on pauses in speech, at regular intervals, etc)</li>
 	<li>Each segment is then transcribed (either by machine, or manually)</li>
-	<br>
-	<li>If transcription is by machine...
-		<ul>
-			<li>An archive of the segments is prepared</li>
-			<li>A separate transcription machine retrieves these archives and produces transcripts for each segment overnight</li>
-			<li>The remote transcriotion machine then archives completed transcripts and sends back to this machine</li>
-		<ul>
-	</li>
-	<br>
-    <li>Transcriptions available for review are listed in the <a href="index.php">list of mp3 recordings awaiting processing</a></li>
 </ol>
+Transcriptions available for review are listed in the <a href="index.php">list of mp3 recordings awaiting processing</a>
 <?php
 
 // globals
@@ -119,9 +110,14 @@ else // otherwise stop the whole process, we can't continue if we don't know wha
 	die('ERROR: no recording pathname was passed to this script - cannot continue!');
 }
 
+// TODO - check these values more efficiently with a function
+// perhaps something like:
+//    isFormSubmittedCorrectly( $_POST, $fieldName, $defaultValue );
+//    containing numeric/textual tests, invoked depending on $_POST[$fieldName]
+
 // if the form has been submitted back into itself correctly there'll be atleast
 // descriptname, speakerlist, fullmp3name, with an OPTIONAL admincomment
-// we write out to the this.submissioninfo file
+// later, we write these values out to filename 'this.submissioninfo'
 if (isset($_POST["descriptname"])
 	&& isset($_POST["speakerlist"])
 	&& isset($_POST["fullmp3name"])
@@ -171,40 +167,217 @@ if (isset($_POST["descriptname"])
 			$admincomment = "no comment";
 		}
 	}
+}
 
+// default values for fields
+
+// sanitise POST value of segmentation mode
+if (isset($_POST['segmentationMode'])){
+	$segmentationMode = $_POST['segmentationMode'];
+	
+	// one of two valid options
+	if ( $segmentationMode !== 'regularIntervals'
+		&& $segmentationMode !== 'naturalSpeechPauses'){
+		echo "<br><b>ERROR: segmentation mode must be either
+			regularIntervals or naturalSpeechPauses!</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+}
+else // set default value
+{
+	$segmentationMode = 'naturalSpeechPauses';
+}
+
+// sanitise POST value of natural speech pause segmentation threshold 
+if (isset($_POST['segmentationThreshold'])){
+	$segmentationThreshold = $_POST['segmentationThreshold'];
+	if ( strlen(trim($segmentationThreshold)) < 1 ){// if it's just whitespace
+		echo "<br><b>ERROR: missing segmenation threshold!</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+	else if( $segmentationThreshold >= 0 ){ // if above 0dBFS
+		echo "<br><b>ERROR: segmenation threshold cannot be at or above 0dBFS!</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+}
+else // set default value
+{
+	$segmentationThreshold = -30;
+}
+
+// sanitise POST value of natural speech pause segmentation count
+if (isset($_POST['segmentationCount'])){
+	$segmentationCount = $_POST['segmentationCount'];
+	if ( strlen(trim($segmentationCount)) < 1 ){// if it's just whitespace
+		echo "<br><b>ERROR: missing segmenation count!</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+	else if( $segmentationCount <= 0 ){ // if zero or below
+		echo "<br><b>ERROR: segmenation threshold cannot be zero (or below)!</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+}
+else // set default value
+{
+	$segmentationCount = 120;
+}
+
+// sanitise POST value of segmentation interval 
+if (isset($_POST['segmentationInterval'])){
+	$segmentationInterval = $_POST['segmentationInterval'];
+	if ( strlen(trim($segmentationInterval)) < 1 ){// if it's just whitespace
+		echo "<br><b>ERROR: missing segmenation interval!</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+	else if( $segmentationInterval < 0.1 ){ // if below 0.1 minutes (6 sec)
+		echo "<br><b>ERROR: segmenation interval cannot be below 0.1 minutes (6 sec)</b>";
+		$isFormSubmittedCorrectly = false;
+	}
+}
+else // set default value (1 minute)
+{
+	$segmentationInterval = 1;
 }
 
 /////////////////
 // start of form
 /////////////////
-echo "<form action=\"$scriptname\" method=\"post\">";
+echo '<form action='
+	. '"' . $scriptname . '" '
+	. 'method="post">';
+
+// listing details
 echo '<fieldset>';
+echo '<legend>Listing details</legend>';
+echo '<p>
+	  Fields in this section control the naming of transcript files.<br>
+	  They also provide an opportunity to add metadata describing the speakers
+	  and context of the recording.
+	  </p>';
 
 // (64 character max) short description i.e. for sakai, projectpad, blackboard, etc
 echo '<b>Short description of recording:</b>';
-echo '<input type="text" name="descriptname" size=30 maxlength=64 value="'. $descriptname . '">';
+echo '<input type="text" name="descriptname" size=30 maxlength=64 value="'
+		. $descriptname 
+		. '">';
 echo '<br>';
 
 // (1024 character max) list of speaker names
 echo '<b>Speaker names (comma separated):</b>';
-echo '<input type="text" name="speakerlist" size=30 maxlength=1024 value="'. $speakerlist . '">';
+echo '<input type="text" name="speakerlist" size=30 maxlength=1024 value="'
+		. $speakerlist 
+		. '">';
 echo '<br>';
 
 // (2048 character max) hidden field containing filename
-echo '<input type="hidden" name="fullmp3name" maxlength=2048 value="'. $fullmp3name . '">';
+echo '<input type="hidden" name="fullmp3name" maxlength=2048 value="'
+		. $fullmp3name 
+		. '">';
 
 // (2048 character max) comment
 echo '<b>(optional) Comment for administration purposes:</b>';
-echo '<input type="text" name="admincomment" size=30 maxlength=2048 value="'. $admincomment . '">'; 
+echo '<input type="text" name="admincomment" size=30 maxlength=2048 value="'
+		. $admincomment 
+		. '">'; 
 echo '<br>';
+echo '</fieldset>';
+
+
+// audio segmentation and timecoding options
+echo '<fieldset>';
+echo '	<legend>Audio segmentation & timecoding</legend>';
+echo '	<p>
+		Fields in this section control the granularity of transcript segments.<br>
+		The default settings are ideal for typical 1h lectures, producing 
+		transcripts with "paragraph" breaks at natural speech pauses.
+		</p>';
+	
+	// (one of two options) segmentation mode
+echo '	<label>Segmentation mode</label>';
+echo '	<input type="radio"
+		name="segmentationMode"
+		value="naturalSpeechPauses"
+		';		
+if ($segmentationMode == 'naturalSpeechPauses') echo ' checked="checked" />';
+else echo ' />';
+echo '	Natural speech pauses';
+
+echo'	<input type="radio"
+		name="segmentationMode"
+		value="regularIntervals"
+		';
+if ($segmentationMode == "regularIntervals") echo ' checked="checked" />';		
+else echo ' />';
+echo '	Regular intervals';
+
+/*
+echo '	<select size=1 name="segmentationMode">
+			<option selected value="naturalSpeechPauses">Natural speech pauses</option>
+			<option value="regularIntervals">Regular intervals</option>
+		</select>
+		(select one)
+	';
+*/
+
+	// advanced settings for natural speech pause segmentation
+echo '	<fieldset>';
+echo '		<legend>Advanced settings (for natural speech pauses)</legend>';
+
+// (maxlength 3, 0dBFS) segmentation threshold
+echo '		<label>Segmentation threshold</label>';
+echo '		<input type="text"
+			name="segmentationThreshold" 
+			maxlength="3" 
+			size="3" 
+			value=' 
+			. '"' . $segmentationThreshold . '"'
+			. '/>
+			(dB)';		
+echo '		<br>';
+
+	// (maxlength 3) segmentation count
+echo '		<label>Segmentation count</label>';
+echo '		<input type="text" 
+			name="segmentationCount" 
+			maxlength="3" 
+			size="3" 
+			value='
+			. '"' . $segmentationCount . '"'
+			. '/>
+			(segments)';
+
+	// end advanced settings for natural speech pause segmantation
+echo '	</fieldset>';
+	
+	// advanced settings for regular interval segmentation
+echo '	<fieldset>';
+echo '	<legend>Advanced settings (for regular intervals)</legend>';
+echo '	<label>Segmentation interval</label>';
+echo '	<input type="text" 
+			name="segmentationInterval" 
+			maxlength="2" 
+			size="2" 
+			value='
+			. '"' . $segmentationInterval . '"'
+			. '/>
+			(minutes)';
+
+	// end advanced settings for regular interval segmentation
+echo '	</fieldset>';
+
+// end advanced settings for audio segmentation
+echo '</fieldset>';
 	
 // hidden field containing pathname that was in the URL
 echo '<input type="hidden" name="pathname" value="'. $pathname . '">';
-	
+
 // submit button and end of form
 echo '<input type="submit" value="Ok">';
-echo '</fieldset>';
 echo "</form>\n";
+
+die();
+
+// ////////////////////////////////////////////
 
 // process audio if the form has been submitted back into itself correctly
 if ( $isFormSubmittedCorrectly == true )

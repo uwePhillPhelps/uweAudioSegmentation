@@ -64,7 +64,10 @@ foreach (new DirectoryIterator('incoming') as $file) {
 	if ( (!$file->isDot()) // if not a dot file (dot , dot dot)
 		 && !$file->isDir() // is not a directory
 		 && !substr_count( $lowercasefilename, '._' )
-		 && substr_count ( $lowercasefilename, '.m4a') 
+		 && 
+		 (    substr_count ( $lowercasefilename, '.m4a') 
+		   || substr_count ( $lowercasefilename, '.mp3')
+		 )
 	)
 	{
 		// process the filename to strip out any "unsafe" or "unwise" content
