@@ -1,7 +1,0 @@
-# 2009 dec 06 - all requests to this directory ask for password
-#
-AuthUserFile "/etc/apache2/.htpasswd"
-AuthType Basic
-AuthName "Please supply the admin password"
-Require valid-user
-
