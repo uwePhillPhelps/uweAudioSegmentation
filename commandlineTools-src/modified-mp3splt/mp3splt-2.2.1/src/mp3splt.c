@@ -1213,7 +1213,7 @@ void put_split_file(const char *file, int progress_data)
   }
   temp[counter] = '\0';
 
-  //UWE transcription - suppress message
+  //zenpho - supress message
   //fprintf(console_out,"   File \"%s\" created%s\n",file,temp);
   //fflush(console_out);
 }
@@ -1507,7 +1507,7 @@ int main(int argc, char *argv[])
   mp3splt_set_split_filename_function(state, put_split_file);
   
   //callback for the progress bar
-  //UWE transcription - suppress progress bar
+  //zenpho
   //mp3splt_set_progress_function(state, put_progress_bar);
 
   //default we write mins_secs_hundr for normal split
@@ -1650,10 +1650,9 @@ int main(int argc, char *argv[])
     print_version_authors(console_err);
   }
   
- // UWE transcription - added xml header
+ // zenpho - added XML header
  print_message("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
  print_message("<Trans version=\"2\">");
- // UWE transcription - TODO include DTD reference
 
   //if -o option, then take the directory path and set it as dir_char
   //if -d option is also specified, then the -d option will replace this
@@ -1842,17 +1841,17 @@ int main(int argc, char *argv[])
     sl->number_of_levels = 0;
     err = SPLT_OK;
 	
-	//UWE transcription - suppress opening message
+	//zenpho - supress opening message
     //fprintf(console_out," Processing file '%s' ...\n",current_filename);
 	
-	// UWE transcription - from this point on, there should just be a stream of XML fragments similar to:
+	// zenpho - from this point on, there should just be a stream of XML fragments similar to:
 	//             <Turn startTime=blah endTime=blah splitFilename=blah speaker=spk1>
 	//             <Sync time=blah />
 	//             ***Include transcript words here***
 	//             </Turn>
 	//
-	// UWE transcription - this stream of XML fragments can then be sandwiched between a header and a footer
-	// UWE transcription - the header should contain definitions for "spk1"
+	// zenpho - this stream of XML fragments can then be sandwiched between a header and a footer
+	// zenpho - the header should contain definitions for "spk1"
 	
     //fflush(console_out);
     //we put the filename
@@ -1965,7 +1964,7 @@ int main(int argc, char *argv[])
           {
             float average_silence_levels = sl->level_sum / (double) sl->number_of_levels;
             char message[256] = { '\0' };
-            // UWE transcription - suppress message
+            // zenpho - supress message
 			snprintf(message,256," Average silence level : %.2f dB", average_silence_levels);
             //print_message(message);
           }
@@ -2007,7 +2006,7 @@ int main(int argc, char *argv[])
 
   free_main_struct(&data);
   
-  //UWE transcription - added TRS XML footer
+  //zenpho - added xml footer
   print_message("</Trans>");
 
   return 0;

@@ -375,9 +375,28 @@ echo '<input type="hidden" name="pathname" value="'. $pathname . '">';
 echo '<input type="submit" value="Ok">';
 echo "</form>\n";
 
-die();
-
 // ////////////////////////////////////////////
+// determine audio segmentation mode
+//		regularIntervals
+//		naturalSpeechPauses
+
+echo '<h2>displaying form post data</h2>';
+echo '<pre>';
+print_r( $_POST );
+echo '</pre>';
+
+// determine 
+switch ( $_POST['segmentationMode'] )
+{
+	case 'naturalSpeechPauses':
+		echo "<h3>WARNING! natural speech pause segmentation mode unavailable - using regular intervals segmentation mode instead</h3>";
+		break;
+	case 'regularIntervals':
+		break;
+	default:
+		echo "<h3>ERROR! unknown segmentation mode $segmentationMode</h3>";
+		break;
+}
 
 // process audio if the form has been submitted back into itself correctly
 if ( $isFormSubmittedCorrectly == true )
@@ -441,6 +460,10 @@ if ( $isFormSubmittedCorrectly == true )
 	}
 	else if ( substr_count( $just_extention, '.mp3') )
 	{	
+	
+		/*
+			incoming-mp3splt.sh requires a different directory structure
+		
 		//////////////////////
 		// create directories
 		//////////////////////
@@ -484,6 +507,8 @@ if ( $isFormSubmittedCorrectly == true )
 		
 		echo "pathname set to $pathname<br>";
 		echo "current path is " . getcwd() . "<br>";
+		
+		*/
 				
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////
@@ -494,41 +519,36 @@ if ( $isFormSubmittedCorrectly == true )
 			<b>Stage 2</b><br>
 			Segmenting mp3 recording for $basename in $pathname
 			</div>";
-	
-				echo "<div style=\"height: 200px; overflow: auto; border: 2px black solid; margin-bottom: 30px\">";
 		
 		$basename = basename($pathname);
 		$mp3file = $just_filename . '.mp3';
 		
-		echo "<pre>";
-		echo "Segmenting mp3 recording - this part could take a while!\n";
-		flush();
-			
-		//Strip whitespace (and tab,newline,etc) from the beginning and end of the arguments
-		$pathname = trim($pathname);
-		$mp3file = trim($mp3file);
-		$basename = trim($basename);
+		echo "<div style=\"height: 200px; overflow: auto; border: 2px black solid; margin-bottom: 30px\">"
+			. "<pre>";
 	
 		// build the command
-		$command = 'bash incoming-mp3splt.sh ' 
-			. escapeshellarg($pathname) . ' ' 
-			. escapeshellarg($mp3file) . ' ' 
-			. escapeshellarg($basename);
+		$command = 'bash incoming-mp3shntool.sh' 
+			. ' ' . escapeshellarg($dirname) 
+			. ' ' . escapeshellarg($basename);
 		
 		// print some debugging info
-		echo "directory : " . $pathname . "\n";
-		echo "mp3 : " . $mp3file . "\n";
-		echo "basename : " . $basename . "\n";
 		echo "command to run is: ". $command. "\n";
+		echo "This part could take a while!\n";
+		flush();
 		
 		// run the command
-		//$output = shell_exec($command);
-		//$output = exec($command);
-		$output = system($command);
+		$output = shell_exec($command);
+		$output = stripcslashes($output);
 		echo $output; // and print the debugging output
+		
+		flush();
 		echo "</pre>";
+		echo "</div>";
 		
 		///////////////////////////
+	
+		/* 
+			incoming-mp3splt.sh does not move to segmented after processing
 	
 		$pathname = 'segmented/' . $basename;
 	
@@ -545,7 +565,7 @@ if ( $isFormSubmittedCorrectly == true )
 			Archiving segments for remote machine-transcription
 			</div>";
 	
-				echo "<div style=\"height: 200px; overflow: auto; border: 2px black solid; margin-bottom: 30px\">";
+		echo "<div style=\"height: 200px; overflow: auto; border: 2px black solid; margin-bottom: 30px\">";
 		
 		echo "<pre>";
 		echo "Preparing archive for machine-transcription - this could take a while!\n";
@@ -580,6 +600,8 @@ if ( $isFormSubmittedCorrectly == true )
 			An archive is now prepared - please return to the <a href=\"index.php\">list of mp3 recordings awaiting processing</a>
 			</div>\n";
 
+		*/
+		
 		$isAudioProcessed = true;
 	
 	}
