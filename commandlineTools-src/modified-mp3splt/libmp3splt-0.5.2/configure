@@ -15024,13 +15024,20 @@ else
 fi
  ogg="no"
 else
-               if true; then
-  OGG_PLUGIN_TRUE=
-  OGG_PLUGIN_FALSE='#'
-else
-  OGG_PLUGIN_TRUE='#'
-  OGG_PLUGIN_FALSE=
-fi
+  #check for -logg -lvorbis -lvorbisfile
+#               XIPH_PATH_OGG(,{ { echo "$as_me:$LINENO: error: Ogg needed! Download the latest version of libogg at http://www.xiph.org" >&5
+#echo "$as_me: error: Ogg needed! Download the latest version of libogg at http://www.xiph.org" >&2;}
+#   { (exit 1); exit 1; }; })
+#              XIPH_PATH_VORBIS(,{ { echo "$as_me:$LINENO: error: Vorbis needed! Download the latest version of libvorbis at http://www.xiph.org" >&5
+#echo "$as_me: error: Vorbis needed! Download the latest version of libvorbis at http://www.xiph.org" >&2;}
+#   { (exit 1); exit 1; }; })
+#               if true; then
+#  OGG_PLUGIN_TRUE=
+#  OGG_PLUGIN_FALSE='#'
+#else
+#  OGG_PLUGIN_TRUE='#'
+#  OGG_PLUGIN_FALSE=
+#fi
  ogg="yes"
 fi
 

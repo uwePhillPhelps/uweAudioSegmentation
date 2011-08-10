@@ -16,10 +16,13 @@ mp3splt.lo mp3splt.o: mp3splt.c /usr/include/sys/stat.h \
   /usr/include/i386/_structs.h /usr/include/machine/_structs.h \
   /usr/include/mach/i386/_structs.h /usr/include/sys/resource.h \
   /usr/include/alloca.h /usr/include/stdio.h /usr/include/secure/_stdio.h \
-  /usr/local/include/ltdl.h ../include/libmp3splt/types_func.h \
-  ../include/libmp3splt/cddb.h ../include/libmp3splt/utils.h \
-  ../include/libmp3splt/checks.h ../include/libmp3splt/plugins.h \
-  ../config.h /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/include/ltdl.h /usr/include/libltdl/lt_system.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h \
+  /usr/include/libltdl/lt_error.h /usr/include/libltdl/lt_dlloader.h \
+  ../include/libmp3splt/types_func.h ../include/libmp3splt/cddb.h \
+  ../include/libmp3splt/utils.h ../include/libmp3splt/checks.h \
+  ../include/libmp3splt/plugins.h ../config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
   /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
   /usr/include/limits.h /usr/include/machine/limits.h \
   /usr/include/i386/limits.h /usr/include/i386/_limits.h \
@@ -97,7 +100,15 @@ mp3splt.lo mp3splt.o: mp3splt.c /usr/include/sys/stat.h \
 
 /usr/include/secure/_stdio.h:
 
-/usr/local/include/ltdl.h:
+/usr/include/ltdl.h:
+
+/usr/include/libltdl/lt_system.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h:
+
+/usr/include/libltdl/lt_error.h:
+
+/usr/include/libltdl/lt_dlloader.h:
 
 ../include/libmp3splt/types_func.h:
 

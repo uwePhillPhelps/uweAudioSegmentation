@@ -22,7 +22,10 @@ cddb.lo cddb.o: cddb.c /usr/include/string.h /usr/include/_types.h \
   /usr/include/i386/signal.h /usr/include/i386/_structs.h \
   /usr/include/machine/_structs.h /usr/include/mach/i386/_structs.h \
   /usr/include/sys/resource.h /usr/include/alloca.h /usr/include/stdio.h \
-  /usr/include/secure/_stdio.h /usr/local/include/ltdl.h \
+  /usr/include/secure/_stdio.h /usr/include/ltdl.h \
+  /usr/include/libltdl/lt_system.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h \
+  /usr/include/libltdl/lt_error.h /usr/include/libltdl/lt_dlloader.h \
   ../include/libmp3splt/types_func.h ../include/libmp3splt/cddb.h \
   ../include/libmp3splt/utils.h ../include/libmp3splt/checks.h \
   ../include/libmp3splt/plugins.h ../config.h \
@@ -132,7 +135,15 @@ cddb.lo cddb.o: cddb.c /usr/include/string.h /usr/include/_types.h \
 
 /usr/include/secure/_stdio.h:
 
-/usr/local/include/ltdl.h:
+/usr/include/ltdl.h:
+
+/usr/include/libltdl/lt_system.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h:
+
+/usr/include/libltdl/lt_error.h:
+
+/usr/include/libltdl/lt_dlloader.h:
 
 ../include/libmp3splt/types_func.h:
 
