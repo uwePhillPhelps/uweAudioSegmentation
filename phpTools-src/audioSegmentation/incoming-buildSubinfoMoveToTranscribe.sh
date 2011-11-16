@@ -9,7 +9,9 @@
 
 # path to PHP processing directory
 #PATH_TRANSCRIPTION_HUB="/Volumes/FAT32/apache2/processing/"
-PATH_TRANSCRIPTION_HUB="/Volumes/LocalHD/dev-snapshots/test-processing/"
+#PATH_TRANSCRIPTION_HUB="/Volumes/LocalHD/dev-snapshots/test-processing/"
+PATH_TRANSCRIPTION_HUB="/Volumes/LocalHD/dev-snapshots/uweAudioSegme\
+ntation/phpTools-src/audioSegmentation/"
 
 # filename for logged messages
 LOGFILE="/Library/Logs/uweAudioSegmentation.log"
