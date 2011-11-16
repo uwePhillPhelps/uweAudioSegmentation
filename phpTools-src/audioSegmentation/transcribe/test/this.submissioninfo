@@ -1,0 +1,12 @@
+test
+dan buzzo
+test.mp3
+no comment
+# ###########################
+#
+# Human readable file format:
+# 1st line - Short name/description Sakai/PPad/Blackboard entry name
+# 2nd line - Names of speakers (comma separated)
+# 3rd line - MP3 filename
+# 4th line - Notes/comments ****BRIEF, ONE LINE ONLY****
+# 5th line and onward ignored

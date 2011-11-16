@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Trans version="2">
+
+<Turn startTime="0.00" endTime="10.00" splitFilename="test/split_wav/test_silence01.wav" speaker="spk1">
+<Sync time="0.00"/>
+***Include transcript words here***
+</Turn>
+<Turn startTime="10.00" endTime="20.00" splitFilename="test/split_wav/test_silence02.wav" speaker="spk1">
+<Sync time="10.00"/>
+***Include transcript words here***
+</Turn>
+<Turn startTime="20.00" endTime="30.00" splitFilename="test/split_wav/test_silence03.wav" speaker="spk1">
+<Sync time="20.00"/>
+***Include transcript words here***
+</Turn>
+<Turn startTime="30.00" endTime="37.75" splitFilename="test/split_wav/test_silence04.wav" speaker="spk1">
+<Sync time="30.00"/>
+***Include transcript words here***
+</Turn>
+</Trans>
