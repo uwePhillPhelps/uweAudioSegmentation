@@ -2,6 +2,8 @@
 # $1 is working directory relative to the script (e.g. incoming/ )
 # $2 is filename to process inside the working directory (e.g. input.mp3 )
 
+# todo: add segmentation interval (in minutes) ala incoming-m4asplit.sh
+
 echo "debug: $1 $2"
 
 FPATH_SRC="$2"
@@ -103,7 +105,7 @@ fi
 echo "\tRemoving wav $FPATH_FULL_WAV_SRC (WAV splitparts remain)"
 rm "$FPATH_FULL_WAV_SRC"
 
-echo "\tConverting splitparts to mp3 (for win32 processing)"
+echo "\tConverting splitparts to mp3 (for transcript viewer)"
 for j in "$PATH_SPLIT_WAV/"*.wav
 do
 	BASENAME_SPLIT_MP3="${j##*/}"
