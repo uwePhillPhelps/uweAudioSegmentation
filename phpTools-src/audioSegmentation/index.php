@@ -77,32 +77,6 @@ foreach (new DirectoryIterator('incoming') as $file) {
 		 )
 	)
 	{
-		// fixing filename - 20 character max
-        // process the filename to strip out any "unsafe" or "unwise" content
-		// e.g. HTML tags, spaces, non alphanumeric characters
-		$lowercasefilename = strip_tags($lowercasefilename);
-		$newFilename = preg_replace("/[^\.a-zA-Z0-9]/", "", $lowercasefilename);
-
-        // if characters >= 20 combine first 10 then last 10
-        $newFilenameLen = strlen($newFilename);
-        if ( $newFilenameLen >= 20 )
-        {
-            $newFilename = substr( $newFilename, 0, 10 )
-                        . substr( $newFilename, -10, 10);
-        }
-
-		$filenameDelta = strlen($file->getFilename()) - strlen($newFilename);
-		$newPathname = $file->getPath().'/'.$newFilename;
-	
-		// rename file to the "safe" filename
-		if ($filenameDelta != 0){
-			rename($file->getPathname(), $newPathname);
-					
-			writeTableRow('--', 'Fixing filename', 
-				"Original filename: " . $file->getFilename() . "<br>\n"
-				. "Renamed filename: " . $newFilename . "<br>\n", 
-				"removed $filenameDelta characters");
-		}
 		$filecount = $filecount + 1; // keep track of how many files we've counted
 		
 		// encode characters in the pathname and filename into %## format for URLs
@@ -110,22 +84,8 @@ foreach (new DirectoryIterator('incoming') as $file) {
 		$encodedpathname = urlencode(urlencode($newPathname));
 		
 		// these files need sgementation
-		$action = "<a href=\"incoming-getSubinfoMoveToTranscribe.php?pathname="
-							. $encodedpathname // the full path to the file
-							. "\">" // close the A tag
-							. "Description needed!"
-							. " </a>";
-		/*
+		$action = "awaiting segmentation";
 
-		$action .= "<br>"; // and another option
-
-		$action .= "<a href=\"incoming-emptyTextStudentEditing.php?pathname="
-							. $encodedpathname // the full path to the file
-							. "\">" // close the A tag
-							. "Empty segments student editing"
-							. " </a>";
-		*/
-			
 		writeTableRow($filecount, $file->getPath(), $newFilename, $action);
 	}
 
@@ -267,6 +227,15 @@ foreach (new DirectoryIterator('transcribe') as $file) {
 				. "generate SRT subtitles"
 				. " </a>";	
 
+		
+		/*
+		 
+		 **********************************************************
+		  this action - move to student editing - is disabled here
+		  but kept around in comments due to the legacy of
+		  supporting collaborative student editing of transcripts
+		 **********************************************************
+			
 		$action .= "<br>"; // another action
 
 		$action .= "<a href=\"transcribe-moveToStudentEditing.php?pathname="
@@ -274,6 +243,7 @@ foreach (new DirectoryIterator('transcribe') as $file) {
 			. "\">" // close the A tag
 			. "move to student editing"
 			. " </a>";	
+		*/
 
 		writeTableRow($filecount, $file->getPath(), $file->getFilename(), $action );	
 
@@ -293,6 +263,14 @@ foreach (new DirectoryIterator('transcribe') as $file) {
    }
 }
 
+/*
+ 
+ ***********************************************************
+ this disabled processing option from a previous version
+ originally dealt with monitoring files in the collaborative
+ student editing system
+ ***********************************************************
+	
 // look in the ./transcribe_symlink directory for 
 // for DIRECTORIES visible in the STUDENT SYSTEM
 foreach (new DirectoryIterator('transcribe_symlink') as $file) {
@@ -329,6 +307,8 @@ foreach (new DirectoryIterator('transcribe_symlink') as $file) {
 		
    }
 }
+ 
+*/
 
 echo "</table>\n"; // always close the table
 echo $filecount . " files found";

@@ -41,13 +41,15 @@ SEGMENT_INTERVAL_MINUTES="1"
 
 # #######################################################################
 # #######################################################################
-# ######			       do not change below here                ######
+# ######                 do not change below here                  ######
 # #######################################################################
 # #######################################################################
 
 ##########################
 # logging function
 function log {
+	# $1 is first argument
+
 	# create logfile for the first time if required
 	touch $LOGFILE
 	
@@ -59,6 +61,45 @@ function log {
 	
 	# also display to stdout (without date string)
 	echo "$1"
+}
+
+##########################
+# check m4a processing is complete
+function launchSegmentationScript {
+	# $1 is first argument
+	
+	# work in the transcription hub root directory
+	WORKING_DIR="${PATH_TRANSCRIPTION_HUB}"
+	log "Changing working directory to $WORKING_DIR"
+	cd "$WORKING_DIR"
+
+	# first argument sets command to run
+	COMMAND_TO_RUN="$1" 
+	
+	# append arguments to command
+	COMMAND_TO_RUN="$COMMAND_TO_RUN $PATH_DIRNAME"
+	COMMAND_TO_RUN="$COMMAND_TO_RUN $FILENAME_SRC"
+	COMMAND_TO_RUN="$COMMAND_TO_RUN $SEGMENT_INTERVAL_MINUTES"
+
+	log "command to run is '$COMMAND_TO_RUN'"
+	log "This part could take a while!"
+
+	$COMMAND_TO_RUN | tee -a $LOGFILE
+			
+	# if the script is successful, the segmented directory 
+	# will contain a subdirectory with the same name as
+	# JUST_FILENAME, and this will contain an mp3 copy and 
+	# skeleton.xml
+	if [ -d "segmented/$JUST_FILENAME" ] \
+	&& [ -f "segmented/$JUST_FILENAME/skeleton.xml" ] \
+	&& [ -f "segmented/$JUST_FILENAME/$JUST_FILENAME.mp3" ]
+	then
+		IS_AUDIO_PROCESSED='true'
+	else
+		IS_AUDIO_PROCESSED='false'
+		log "ERROR - cannot proceed, segmentation failed."
+		exit -1
+	fi
 }
 
 ##########################
@@ -100,31 +141,10 @@ case "$JUST_EXTENTION" in
 	
 		log "preparing to segment m4a file ${FILENAME_SRC}"
 		
-		# work in the transcription hub root directory
-		WORKING_DIR="${PATH_TRANSCRIPTION_HUB}"
-		log "Changing working directory to $WORKING_DIR"
-		cd "$WORKING_DIR"
+		launchSegmentationScript "./incoming-m4asplit.sh"
 		
-		COMMAND_TO_RUN="./incoming-m4asplit.sh"
-		COMMAND_TO_RUN="$COMMAND_TO_RUN $PATH_DIRNAME"
-		COMMAND_TO_RUN="$COMMAND_TO_RUN $FILENAME_SRC"
-		COMMAND_TO_RUN="$COMMAND_TO_RUN $SEGMENT_INTERVAL_MINUTES"
-		
-		log "command to run is '$COMMAND_TO_RUN'"
-		log "This part could take a while!"
-		
-		$COMMAND_TO_RUN | tee -a $LOGFILE
-				
-		# if the script is successful, the segmented directory 
-		# will contain a subdirectory with the same name as
-		# JUST_FILENAME, and this will contain an mp3 copy and 
-		# skeleton.xml
-		if [ -d "segmented/$JUST_FILENAME" ] \
-		&& [ -f "segmented/$JUST_FILENAME/skeleton.xml" ] \
-		&& [ -f "segmented/$JUST_FILENAME/$JUST_FILENAME.mp3" ]
+		if [[ "$IS_AUDIO_PROCESSED" == 'true' ]];
 		then
-			IS_AUDIO_PROCESSED='true'
-		
 			# now tweak FILENAME_SRC and JUST_EXTENTION in order to 
 			# write submissioninfo as if the original input was mp3
 			#
@@ -132,10 +152,6 @@ case "$JUST_EXTENTION" in
 			FILENAME_SRC="${JUST_FILENAME}.${JUST_EXTENTION}"
 			log "debug: FILENAME_SRC is now $FILENAME_SRC"
 			log "debug: JUST_EXTENTION is now $JUST_EXTENTION"
-		else
-			IS_AUDIO_PROCESSED='false'
-			log "ERROR - cannot proceed, segmentation failed."
-			exit -1
 		fi
 		;;
 	
@@ -147,8 +163,7 @@ case "$JUST_EXTENTION" in
 	
 		log "preparing to segment mp3 file ${FILENAME_SRC}"
 	
-		log "ERROR - not implemented. Cannot proceed."
-		exit -1
+		launchSegmentationScript "./incoming-mp3shntool.sh"
 		;;
 	
 	*)
@@ -227,3 +242,5 @@ then
 		mv "$SOURCE_TO_MOVE" "$DESTINATION_FOR_MOVE"
 	fi
 fi
+
+exit 
