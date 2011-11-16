@@ -38,10 +38,17 @@ Thanks,
 <?php
 // link to start periodic TRS XML conversion
 $encodedpathname = '';
+
+/*
+ * disabled
+ *
+
+// link to periodically merge 'approved' segments into TRS XML files
 echo "<br>"
 	. "<a href=\"/admin-periodicTRSXML.php\">"
 	. "periodically create TRS XML (for student search)"
 	. " </a>";
+*/
 
 // print the table headers
 echo "
@@ -70,10 +77,20 @@ foreach (new DirectoryIterator('incoming') as $file) {
 		 )
 	)
 	{
-		// process the filename to strip out any "unsafe" or "unwise" content
+		// fixing filename - 20 character max
+        // process the filename to strip out any "unsafe" or "unwise" content
 		// e.g. HTML tags, spaces, non alphanumeric characters
 		$lowercasefilename = strip_tags($lowercasefilename);
 		$newFilename = preg_replace("/[^\.a-zA-Z0-9]/", "", $lowercasefilename);
+
+        // if characters >= 20 combine first 10 then last 10
+        $newFilenameLen = strlen($newFilename);
+        if ( $newFilenameLen >= 20 )
+        {
+            $newFilename = substr( $newFilename, 0, 10 )
+                        . substr( $newFilename, -10, 10);
+        }
+
 		$filenameDelta = strlen($file->getFilename()) - strlen($newFilename);
 		$newPathname = $file->getPath().'/'.$newFilename;
 	
@@ -242,7 +259,15 @@ foreach (new DirectoryIterator('transcribe') as $file) {
 				. "review transcript"
 				. " </a>";
 
-		$action .= "<br>"; // another action		
+		$action .= "<br>"; // another action	
+
+		$action .= "<a href=\"transcribe-generateSRT.php?pathname="
+				. $encodedpathname
+				. "\">" // close the A tag
+				. "generate SRT subtitles"
+				. " </a>";	
+
+		$action .= "<br>"; // another action
 
 		$action .= "<a href=\"transcribe-moveToStudentEditing.php?pathname="
 			. $encodedpathname
@@ -353,9 +378,8 @@ function writeTableRow($filecount,$status,$filename,$action){
 </script>
 <div class="instructions hidden" id="instructions">
 <b>Instructions:</b>
-To upload recordings for processing - <a href="ftp://incoming:@<?php echo $_SERVER[SERVER_ADDR]; ?>">Connect via FTP</a> or 
-or <a href="afp://incoming:@<?php echo $_SERVER[SERVER_ADDR]; ?>/incoming">connect via AFP</a><br>
-(use username: "<i>incoming</i>" with an empty blank password)<br>
+To upload recordings for processing - <a href="ftp://ppad:@<?php echo $_SERVER[SERVER_ADDR]; ?>/Public/Drop Box/">Connect via FTP</a> or 
+or <a href="afp://incoming:@<?php echo $_SERVER[SERVER_ADDR]; ?>/Public/Drop Box/">connect via AFP</a><br>
 You can then use this interface to monitor and manage the various processing stages (where each row in the table above represents a file or group of files).<br>
 </p>
 <p>

@@ -40,16 +40,38 @@ Thanks,
             , E_USER_ERROR);
     }
     
-    // header
+    // read submissioninfo
+    $submissionInfoContents = file_get_contents($pathname. "/this.submissioninfo",FILE_TEXT);
+    
+    // remove comment lines (beginning with #)
+    $submissionInfoContents = preg_replace('/#.*$/sm', '', $submissionInfoContents, 1);
+    
+    // split into array
+    $submissionInfoContents = explode("\n", $submissionInfoContents);
+    
+    // display submission info header
     echo "<div class=\"pageTitle\">"
 		. "<h3>Transcript preview for $pathname</h3>"
-		. "<pre>"
-		. file_get_contents($pathname. "/this.submissioninfo",FILE_TEXT,NULL,0,120)
-		. "</pre>"
-		. "Click numbers in timecode column to seek audio file"
-		. "</div>\n";
+        . "</div>\n"
+        . "<div class=\"submissionInfo processingText\">"
+        . "Submission info:"
+		. "<pre>";
+    
+    // display submission info
+    echo "Short description: " . $submissionInfoContents[0]
+        . "\n";
+    echo "Speakers (comma separated): " . $submissionInfoContents[1]
+        . "\n";
+    echo "Full MP3 recording filename: " . $submissionInfoContents[2]
+        . "\n";
+    echo "Admin comment: " . $submissionInfoContents[3]
+        . "\n";
+    
+	echo "</pre>"
+        . "</div>"
+        . "\n";
 	            	
-	// original full mp3 link
+	// link to download original recording
 	$infofilename = $pathname . "/this.submissioninfo";
 	$infofilehandle = fopen($infofilename, 'r') or trigger_error(
 		"Can't open the submissioninfo data file for this transcript ($infofilename)"
@@ -65,6 +87,18 @@ Thanks,
 	unset($dummy);
 	$encodedfullmp3 = urlencode($fullmp3);
 	echo "<a href=\"$fullmp3\">Download the full original recording</a><br>";
+    
+    // link to download SRT subtitle file 
+    echo "<a href=\"transcribe-generateSRT.php"
+        . "?pathname=" . $encodedpathname . "\">"
+        . "Download SRT subtitle file"
+        . "</a><br>"
+        . "\n";
+
+    // link to list of recordings
+    echo "<a href=\"index.php\">Back to list of mp3 recordings</a><br>"
+	. "\n";
+    
                
     // audio player for mp3 "listen" link
     // for use with javascript document rewriting
@@ -117,8 +151,8 @@ Thanks,
     echo "</div>";
     
 	// TRSXMLTools::extractTagData()- extracts timecode information (using object method callback)
-    $obj_trstools = new TRSXMLTools();
-    $obj_trstools->parseXMLFilename($pathname . "/skeleton.xml");
+    $obj_trs = new TRSXMLTools();
+    $obj_trs->fetch($pathname . "/skeleton.xml");
                  
     // now print out a table of transcript information
     echo "<div style=\"height: 400px; width: 100%; overflow: auto;\">";
@@ -126,81 +160,86 @@ Thanks,
     echo "<th>Time<br>(secs)</th>";
     echo "<th width=\"95%\">Transcript text</th>"; 
     
-    for ($outputcount = 0; $outputcount <= $obj_trstools->tagcount; $outputcount++)
+     // iterate over each 'turn' in the skeleton 
+    foreach ($obj_trs->eachTurn() as $turn)
     {
-              
-        if ($obj_trstools->ary_types[$outputcount] == 'T'){
-        
-        	/////////////////////////////////////////////////////////////////
-        	// tag a row with an id for the scrolling flash/javascript to seek to
-            echo "<tr class=\"viewerTableRow\" id=\"" 
-            	. (int)($obj_trstools->ary_times[$outputcount] * 1000) 
-            	. "\">\n";
-                        
-            /////////////////////////////////////////////////////////////////
-           	// segment time column         	
-            echo "<td>"
-            	. "<span class=\"listenButton\" "
-				. "onclick=\"seekPlayheadToTime('"
-				. ($obj_trstools->ary_times[$outputcount] * 1000)
-				. "')\"> "
-				. $obj_trstools->ary_times[$outputcount]
-				. "</span>\n"
-                . "</td>\n";
-                        
-            ////////////////////////////////////////////////////////////////
-            // segment text
-            echo "<td>\n";
-			
             
-            //old mp3 splt version 
-	    //$segment_mp3_pathname = $pathname . "/" . $obj_trstools->ary_fnames[$outputcount];
-            $segment_mp3_pathname = "transcribe" . "/" . $obj_trstools->ary_fnames[$outputcount];
+		// extract timecode information from each 'turn'
+		$startTime = $turn->_attr->STARTTIME;
+		$endTime = $turn->_attr->ENDTIME;
+		$splitFilename = $turn->_attr->SPLITFILENAME;
+		  
+		/////////////////////////////////////////////////////////////////
+		// tag a row with an id for the scrolling flash/javascript to seek to
+		echo "<tr class=\"viewerTableRow\" id=\"" 
+			. (int)($startTime * 1000) 
+			. "\">\n";
+					
+		/////////////////////////////////////////////////////////////////
+		// segment time column         	
+		echo "<td>"
+			. "<span class=\"listenButton\" "
+			. "onclick=\"seekPlayheadToTime('"
+			. ($startTime * 1000)
+			. "')\"> "
+			. $startTime
+			. "</span>\n"
+			. "</td>\n";
+					
+		////////////////////////////////////////////////////////////////
+		// segment text
+		echo "<td>\n";
+		
+		
+		//determine paths (mp3, txt, rtf)
+		$segment_mp3_pathname = "transcribe" . "/" . $splitFilename;
+		
+		$txt_pathname = substr($segment_mp3_pathname, 0, -3) . "txt";
+		$rtf_pathname = substr($segment_mp3_pathname, 0, -3) . "rtf";
+	
+		// debugging
+		//echo "txt: $txt_pathname, ------ , rtf: $rtf_pathname";
+		
+		if ( file_exists( $txt_pathname ) && file_exists( $rtf_pathname ) ){
+		
+			// if both rtf and txt files exist
+			$transcriptText = "<b>WARNING</b> - conflicting transcript text. "
+				. "Both RTF and TXT files exist for " 
+				. substr($segment_mp3_pathname, 0, -4)
+				. "<br><br>";
+		}
+		else if ( file_exists( $txt_pathname ) ){
+		
+			// if the txt file exists
+			$filehandle = fopen($txt_pathname,'r') or trigger_error(
+				"Error: Cannot open transcript text $txt_pathname"
+				, E_USER_ERROR);
+				
+			// read in 4kb chunks til the end
+			$transcriptText = '';
+			while ($file_content = fread($filehandle, 4096))
+			{
+				$transcriptText .= $file_content;
+			}
+		}
+		else if ( file_exists( $rtf_pathname )  ) {
 			
-            $txt_pathname = substr($segment_mp3_pathname, 0, -3) . "txt";
-            $rtf_pathname = substr($segment_mp3_pathname, 0, -3) . "rtf";
+			// if the rtf file exists
+			$command = './convertRichTextToAscii ' . $rtf_pathname;
+			$transcriptText = shell_exec($command);
+		}
+		
+		// sanitise text
+		$transcriptText = stripslashes($transcriptText); 
+		
+		// output text
+		echo $transcriptText;
+		
+		// close tags
+		echo "</td>\n";
+		echo "</tr>\n";
 
-	    //echo "txt: $txt_pathname, ------ , rtf: $rtf_pathname";
-            
-            if ( file_exists( $txt_pathname ) && file_exists( $rtf_pathname ) ){
-            
-                // if both rtf and txt files exist
-                $transcriptText = "<b>WARNING</b> - conflicting transcript text. "
-                    . "Both RTF and TXT files exist for " 
-                    . substr($segment_mp3_pathname, 0, -4)
-                    . "<br><br>";
-            }
-            else if ( file_exists( $txt_pathname ) ){
-            
-                // if the txt file exists
-                $filehandle = fopen($txt_pathname,'r') or trigger_error(
-                    "Error: Cannot open transcript text $txt_pathname"
-                    , E_USER_ERROR);
-                    
-                // read in 4kb chunks til the end
-                $transcriptText = '';
-                while ($file_content = fread($filehandle, 4096))
-                {
-                    $transcriptText .= $file_content;
-                }
-            }
-            else if ( file_exists( $rtf_pathname )  ) {
-                
-                // if the rtf file exists
-                $command = './convertRichTextToAscii ' . $rtf_pathname;
-                echo shell_exec($command);
-            }
-            
-			echo stripslashes($transcriptText); // strip slashes
-            echo "</td>\n";
-            
-            echo "</tr>\n";
-            
-        }// if Turn tag
-        
-        	
-        
-    }// for
+    }// foreach turn tag
     echo "</table>";
     echo "</div>";
     

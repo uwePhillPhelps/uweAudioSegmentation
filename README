@@ -11,8 +11,13 @@ The purpose of the audioSegmentation component is to:
 	* automatically prepare newly "dropped" files for segmentation
 	* convert and segment audio
 	* provide a web interface to:
-		* control the segmentation process
 		* preview timecoded skeleton-segmentation TRS XML 
+
+It has been hacked around a bit to provide additional functionality (originally intended to be part of uweTranscriptionHub):
+
+	* providing a web interface to:
+		* control the segmentation process
+		* produce subtitles (in SRT format) by combining RTF/TXT segments and TRS XML timecode
 
 Requirements
 This component has only been tested on OSX 10.6.3.

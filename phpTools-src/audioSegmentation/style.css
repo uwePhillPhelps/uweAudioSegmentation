@@ -144,6 +144,31 @@ div.audioPlayer {
 }
 
 /* ************************** 
+*** submission info 
+*/
+div.submissionInfo {
+    margin-left:auto;  
+    margin-right:auto; 
+    
+    width:50%; 
+    border: black 2px solid;
+    
+    margin-bottom: 20px;
+}
+
+/* ************************** 
+*** transcript viewer
+*/
+tr.viewerTableRow {
+    background: lavender;
+}
+
+tr.viewerTableRowHighlighted {
+    background: wheat;
+}
+
+
+/* ************************** 
 *** mp3 player buttons
 */
 
