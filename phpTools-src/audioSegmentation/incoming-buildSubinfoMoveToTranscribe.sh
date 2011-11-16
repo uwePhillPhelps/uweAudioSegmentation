@@ -216,13 +216,14 @@ then
 
 	SOURCE_TO_MOVE="segmented/${JUST_FILENAME}"
 	DESTINATION_FOR_MOVE="transcribe/${JUST_FILENAME}"
-	log 
+	log "preparing to move $SOURCE_TO_MOVE to $DESTINATION_FOR_MOVE"
 	
 	# abort if directory has already been moved
 	if [[ -d "$DESTINATION_FOR_MOVE" ]]; then
-		echo "ERROR - $JUST_FILENAME directory already exists. Cannot proceed."
+		log "ERROR - $JUST_FILENAME directory already exists. Cannot proceed."
 		exit -1
 	else
+		log "moving"
 		mv "$SOURCE_TO_MOVE" "$DESTINATION_FOR_MOVE"
 	fi
 fi
