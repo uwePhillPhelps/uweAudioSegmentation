@@ -63,6 +63,9 @@ function log {
 # script begins
 ##########################
 
+# clear screen
+clear
+
 # debug 
 log "first argument passed to script: $1"
 
