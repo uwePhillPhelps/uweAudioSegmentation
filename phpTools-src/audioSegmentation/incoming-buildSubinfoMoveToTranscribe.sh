@@ -69,8 +69,9 @@ function log {
 log "first argument passed to script: $1"
 
 # work in the transcription hub root directory
-log "Changing working directory to $PATH_TRANSCRIPTION_HUB"
-cd "$PATH_TRANSCRIPTION_HUB"
+WORKING_DIR="${PATH_TRANSCRIPTION_HUB}"
+log "Changing working directory to $WORKING_DIR"
+cd "$WORKING_DIR"
 
 # extract pathname, dirname, basename, and file extention
 FULL_PATH_SRC="$1"
@@ -99,9 +100,10 @@ case "$JUST_EXTENTION" in
 	
 		log "preparing to segment m4a file ${FILENAME_SRC}"
 		
-		# work in the correct directory
-		log "Changing working directory to $PATH_TRANSCRIPTION_HUB"
-		cd "$PATH_TRANSCRIPTION_HUB"
+		# work in the transcription hub root directory
+		WORKING_DIR="${PATH_TRANSCRIPTION_HUB}"
+		log "Changing working directory to $WORKING_DIR"
+		cd "$WORKING_DIR"
 		
 		COMMAND_TO_RUN="./incoming-m4asplit.sh"
 		COMMAND_TO_RUN="$COMMAND_TO_RUN $PATH_DIRNAME"
@@ -127,7 +129,7 @@ case "$JUST_EXTENTION" in
 			# write submissioninfo as if the original input was mp3
 			#
 			JUST_EXTENTION="mp3"
-			FILENAME_SRC="${JUST_FILENAME}.${JUST_EXENTION}"
+			FILENAME_SRC="${JUST_FILENAME}.${JUST_EXTENTION}"
 			log "debug: FILENAME_SRC is now $FILENAME_SRC"
 			log "debug: JUST_EXTENTION is now $JUST_EXTENTION"
 		else
@@ -196,4 +198,31 @@ then
 else
 	log "ERROR - audio is not segmented, cannot proceed"
 	exit -1
+fi
+
+#######################################
+# move the files to the transcribe dir
+#######################################
+
+# work in the transcription hub root directory
+WORKING_DIR="${PATH_TRANSCRIPTION_HUB}"
+log "Changing working directory to $WORKING_DIR"
+cd "$WORKING_DIR"
+
+# only move if subinfo exists and has a nonzero size
+# also doublecheck to see if already moved
+if [[ -s "segmented/${FNAME_SUBINFO}" ]];
+then
+
+	SOURCE_TO_MOVE="segmented/${JUST_FILENAME}"
+	DESTINATION_FOR_MOVE="transcribe/${JUST_FILENAME}"
+	log 
+	
+	# abort if directory has already been moved
+	if [[ -d "$DESTINATION_FOR_MOVE" ]]; then
+		echo "ERROR - $JUST_FILENAME directory already exists. Cannot proceed."
+		exit -1
+	else
+		mv "$SOURCE_TO_MOVE" "$DESTINATION_FOR_MOVE"
+	fi
 fi

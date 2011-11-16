@@ -10,16 +10,14 @@
 # #######################################################################
 
 #
-PATH_TRANSCRIPTION_HUB="/Volumes/LocalHD/dev-snapshots/test-processing"
+# none
+#
 
 # #######################################################################
 # #######################################################################
 # ######			begin script - do not change below here        ######
 # #######################################################################
 # #######################################################################
-
-# change working directory
-cd "$PATH_TRANSCRIPTION_HUB"
 
 # test segmentation interval
 SEGMENTATION_INTERVAL="$3"
